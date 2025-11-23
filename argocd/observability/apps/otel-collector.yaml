@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability-otel-collector
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: observability
+    app.kubernetes.io/component: otel-collector
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nader/dk8s.git
+    targetRevision: HEAD
+    path: observability/otel-collector
+    kustomize:
+      version: v4.5.7
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: telemetry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Validate=false

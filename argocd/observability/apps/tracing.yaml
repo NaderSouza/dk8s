@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability-tracing
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: observability
+    app.kubernetes.io/component: tracing
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nader/dk8s.git
+    targetRevision: HEAD
+    path: observability/tracing
+    helm:
+      releaseName: tracing
+      valueFiles:
+        - values.yaml
+      version: v3
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tracing
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - Validate=false

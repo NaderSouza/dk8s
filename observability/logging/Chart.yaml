@@ -1,0 +1,9 @@
+apiVersion: v2
+name: logging-stack
+version: 0.1.0
+description: Wrapper chart for Grafana loki-stack with Promtail daemonset.
+type: application
+dependencies:
+  - name: loki-stack
+    version: 2.10.2
+    repository: https://grafana.github.io/helm-charts

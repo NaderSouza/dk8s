@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "monitoring-stack.fullname" . }}-otel-collector
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: otel-collector-servicemonitor
+    app.kubernetes.io/part-of: observability
+spec:
+  namespaceSelector:
+    matchNames:
+      - telemetry
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  endpoints:
+    - port: metrics
+      interval: 30s
+      scheme: http
+      honorLabels: true
+      path: /metrics

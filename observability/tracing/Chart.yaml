@@ -1,0 +1,9 @@
+apiVersion: v2
+name: tracing-stack
+version: 0.1.0
+description: Wrapper chart for Grafana Tempo tracing backend.
+type: application
+dependencies:
+  - name: tempo
+    version: 1.12.1
+    repository: https://grafana.github.io/helm-charts

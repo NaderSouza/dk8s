@@ -1,0 +1,157 @@
+kube-prometheus-stack:
+  namespaceOverride: monitoring
+  fullnameOverride: kube-prometheus-stack
+  defaultRules:
+    create: true
+  prometheusOperator:
+    namespaceOverride: monitoring
+  kube-state-metrics:
+    namespaceOverride: monitoring
+  prometheus-node-exporter:
+    hostRootfs: /host/root
+  alertmanager:
+    namespaceOverride: monitoring
+    alertmanagerSpec:
+      replicas: 1
+  prometheus:
+    annotations:
+      observability.dk8s.dev/component: prometheus
+    prometheusSpec:
+      scrapeInterval: 30s
+      evaluationInterval: 30s
+      retention: 15d
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      enableRemoteWriteReceiver: true
+      externalLabels:
+        cluster: dk8s-lab
+  grafana:
+    adminUser: admin
+    adminPassword: admin
+    service:
+      type: ClusterIP
+      port: 80
+    additionalDataSources:
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki.logging.svc.cluster.local:3100
+        jsonData:
+          maxLines: 1000
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        access: proxy
+        url: http://tempo-query-frontend.tracing.svc.cluster.local:3100
+        jsonData:
+          httpMethod: GET
+          tracesToMetrics:
+            datasourceUid: prometheus
+            tags:
+              - key: service.name
+                value: "{{service.name}}"
+          tracesToLogs:
+            datasourceUid: loki
+            mapTagNames:
+              - key: k8s.pod.name
+                value: pod
+            filteredFields:
+              - key: namespace
+                value: "{{kube_namespace}}"
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        isDefault: true
+        editable: true
+    sidecar:
+      dashboards:
+        enabled: true
+        provider:
+          foldersFromFilesStructure: true
+      datasources:
+        enabled: true
+    dashboards:
+      default:
+        kubernetes-cluster-overview:
+          json: |
+            {
+              "title": "Kubernetes Cluster Overview",
+              "uid": "k8s-cluster",
+              "schemaVersion": 36,
+              "version": 1,
+              "panels": [
+                {
+                  "type": "stat",
+                  "title": "Nodes Ready",
+                  "targets": [
+                    {
+                      "expr": "count(kube_node_info)",
+                      "legendFormat": "nodes"
+                    }
+                  ],
+                  "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+                },
+                {
+                  "type": "timeSeries",
+                  "title": "API Server Requests",
+                  "targets": [
+                    {
+                      "expr": "sum(rate(apiserver_request_total[5m]))",
+                      "legendFormat": "requests/s"
+                    }
+                  ],
+                  "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0}
+                }
+              ]
+            }
+        application-health-overview:
+          json: |
+            {
+              "title": "Application Health Overview",
+              "uid": "apps-health",
+              "schemaVersion": 36,
+              "version": 1,
+              "panels": [
+                {
+                  "type": "stat",
+                  "title": "HTTP 5xx",
+                  "targets": [
+                    {
+                      "expr": "sum(rate(http_server_requests_seconds_count{status=\"5xx\"}[5m]))",
+                      "legendFormat": "5xx"
+                    }
+                  ],
+                  "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+                },
+                {
+                  "type": "timeSeries",
+                  "title": "Latency p95",
+                  "targets": [
+                    {
+                      "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le))",
+                      "legendFormat": "p95"
+                    }
+                  ],
+                  "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0}
+                }
+              ]
+            }
+        distributed-traces:
+          json: |
+            {
+              "title": "Distributed Traces",
+              "uid": "traces-overview",
+              "schemaVersion": 36,
+              "version": 1,
+              "panels": [
+                {
+                  "type": "trace",
+                  "title": "Tempo Explorer",
+                  "datasource": "Tempo",
+                  "gridPos": {"h": 20, "w": 24, "x": 0, "y": 0}
+                }
+              ]
+            }

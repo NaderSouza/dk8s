@@ -1,0 +1,9 @@
+apiVersion: v2
+name: monitoring-stack
+version: 0.1.0
+description: Opinionated wrapper chart for kube-prometheus-stack used in dk8s labs.
+type: application
+dependencies:
+  - name: kube-prometheus-stack
+    version: 56.6.2
+    repository: https://prometheus-community.github.io/helm-charts

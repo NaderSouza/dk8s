@@ -1,0 +1,54 @@
+loki-stack:
+  loki:
+    fullnameOverride: loki
+    replicaCount: 1
+    persistence:
+      enabled: false
+    config:
+      auth_enabled: false
+      server:
+        http_listen_port: 3100
+      schema_config:
+        configs:
+          - from: 2022-01-01
+            store: boltdb-shipper
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+      storage_config:
+        boltdb_shipper:
+          shared_store: filesystem
+          active_index_directory: /data/loki/index
+          cache_location: /data/loki/cache
+        filesystem:
+          directory: /data/loki/chunks
+    service:
+      type: ClusterIP
+      port: 3100
+    podLabels:
+      app.kubernetes.io/part-of: observability
+      app.kubernetes.io/component: loki
+  promtail:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+    config:
+      clients:
+        - url: http://loki.logging.svc.cluster.local:3100/loki/api/v1/push
+      snippets:
+        pipeline_stages:
+          - cri: {}
+          - labeldrop:
+              - filename
+    extraScrapeConfigs: []
+    podLabels:
+      app.kubernetes.io/part-of: observability
+      app.kubernetes.io/component: promtail
+  grafana:
+    enabled: false
+  prometheus:
+    enabled: false
+  fluent-bit:
+    enabled: false

@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: telemetry
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: telemetry
+    app.kubernetes.io/part-of: observability
+data:
+  collector.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+        send_batch_max_size: 8192
+        timeout: 5s
+    exporters:
+      otlp/tempo:
+        endpoint: tempo-distributor.tracing.svc.cluster.local:4317
+        tls:
+          insecure: true
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        namespace: telemetry
+      logging:
+        loglevel: info
+    service:
+      telemetry:
+        metrics:
+          address: 0.0.0.0:8888
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp/tempo, logging]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [prometheus]

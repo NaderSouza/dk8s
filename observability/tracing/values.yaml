@@ -1,0 +1,48 @@
+tempo:
+  fullnameOverride: tempo
+  tempo:
+    replicaCount: 1
+    metricsGenerator:
+      enabled: true
+    retention:
+      deletesEnabled: false
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    config:
+      server:
+        http_listen_port: 3200
+      distributor:
+        receivers:
+          otlp:
+            protocols:
+              http:
+                endpoint: 0.0.0.0:4318
+              grpc:
+                endpoint: 0.0.0.0:4317
+      storage:
+        trace:
+          backend: local
+          wal:
+            path: /var/tempo/wal
+          local:
+            path: /var/tempo/traces
+  traces:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+  queryFrontend:
+    replicaCount: 1
+    service:
+      type: ClusterIP
+      port: 3100
+  tempoQuery:
+    enabled: true
+  serviceMonitor:
+    enabled: false
