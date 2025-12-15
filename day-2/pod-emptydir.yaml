@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: baldur
+  name: baldur
+spec:
+  containers:
+  - image: nginx
+    name: webserver
+    volumeMounts:
+    - mountPath: /baldur-data
+      name: baldur-emtydir
+
+    resources:
+      limits:
+        cpu: "1"
+        memory: "128Mi"
+      requests:
+        cpu: "0.5"
+        memory: "64Mi"
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: baldur-emtydir
+    emptyDir:
+      sizeLimit: "256Mi"
+status: {}

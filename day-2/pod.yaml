@@ -1,16 +1,20 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  # creationTimestamp: null
   labels:
-    run: nhs-app
-  name: nhs-app
+    run: kratos
+    service: webserver
+  name: kratos
 spec:
   containers:
   - image: nginx
-    name: nhs-app
-    ports:
-    - containerPort: 80
+    name: nginx
+    resources: {}
+  - image: busybox
+    name: busybox
+    args:
+    - sleep
+    - "600"
     resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: baldur
+  labels:
+    app: nginx-deployment
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment
+    spec:
+      containers:
+      - image: nginx:1.16.0
+        name: nginx
+        resources:
+          requests:
+            cpu: "0.3"
+            memory: "64Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
