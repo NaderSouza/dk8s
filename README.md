@@ -2,6 +2,8 @@
 
 Repositório usado para consolidar os estudos do curso Dk8s – Descomplicando Kubernetes. Aqui ficam os manifestos, anotações e comandos executados ao longo das aulas, permitindo reproduzir o ambiente de laboratório e revisar os conceitos vistos.
 
+> **Ferramentas de apoio:** [Headlamp](tools/headlamp/README.md), uma UI para visualizar o cluster kind em tempo real enquanto aplica os manifestos das aulas.
+
 ## Day-1 — Introdução ao Kubernetes
 
 ### 1. Conhecimentos adquiridos
